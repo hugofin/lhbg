@@ -2,26 +2,49 @@ el :: String -> String -> String
 el tag content =
   "<" <> tag <> ">" <> content <> "</" <> tag <> ">"
 
-html_ :: String -> String
-html_ = el "html"
+html_ :: Title -> Structure -> Html
+html_ title content = Html 
+  (el "html" 
+    (el "head" (el "title" title)
+      <> el "body" (getStructureString content)
+    )
+  )
 
-body_ :: String -> String
-body_ = el "body"
+title_ :: String -> Structure
+title_ = Structure . el "title"
 
-head_ :: String -> String
-head_ = el "head"
+p_ :: String -> Structure
+p_ = Structure . el "p"
 
-title_ :: String -> String
-title_ = el "title"
+h1_ :: String -> Structure
+h1_ = Structure . el "h1"
 
-p_ :: String -> String
-p_ = el "p"
+newtype Html = Html String
+newtype Structure = Structure String
 
-h1_ :: String -> String
-h1_ = el "h1"
+type Title = String
 
-makeHtml title body = html_ ( head_ ( title_ title) <> (body_ body))
+append_ :: Structure -> Structure -> Structure
+append_ c1 c2 =
+  Structure (getStructureString c1 <> getStructureString c2)
 
-myhtml = makeHtml "Mitski" (h1_ "Laurel Hell" <> p_ "A burning hill")
+render :: Html -> String
+render html = case html of Html str -> str
 
-main = putStrLn myhtml
+getStructureString :: Structure -> String
+getStructureString content = case content of Structure str -> str
+
+main :: IO ()
+main = putStrLn (render myhtml)
+
+myhtml :: Html
+myhtml = 
+  html_ 
+    "Mitski"
+    (append_ 
+      (h1_ "Laurel Hell") 
+      (append_
+        (p_ "A burning hill")
+        (p_ "i miss you more than anything")
+      )
+    )
